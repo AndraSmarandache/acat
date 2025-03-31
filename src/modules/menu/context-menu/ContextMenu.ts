@@ -24,7 +24,7 @@ export class ContextMenu implements Module {
                     new PlayButton(() => console.log('Play button clicked')),
                     new PauseButton(() => console.log('Pause button clicked')),
                     new RefreshButton(() => console.log('Refresh button clicked')),
-                    new ThemeButton(()=> console.log('Theme button clicked')),
+                    new ThemeButton(),
                 ],
             }),
         );

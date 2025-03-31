@@ -111,3 +111,32 @@ div.vis-manipulation {
   opacity: 0.5;
   pointer-events: none;  /* Prevent any interactions with disabled items */
 }
+
+theme-button {
+    cursor: pointer;
+    position: relative;
+    width: 30px;
+    height: 30px;
+    left: 5px;
+    right: 10px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        background-color: var(--hover-buttons);
+      }
+  
+      &:active {
+        opacity: var(--active-opacity);
+      }
+  
+      &.selected {
+        background: var(--hover-buttons);
+      }
+}
