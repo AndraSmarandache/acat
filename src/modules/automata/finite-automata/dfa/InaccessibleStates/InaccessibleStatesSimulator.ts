@@ -124,42 +124,57 @@ export class InaccessibleStatesSimulator {
     protected async removeInaccessibleStatesWithVisualization(input: string) {
         try {
             // Step 1: Show initial state
-            await this.highlightState(this.model.getInitialState(), 'orange');
-            this.mainView?.logMessage('Checking for inaccessible states...');
+            await this.highlightState(this.model.getInitialState(), 'orange', 1000);
+            this.mainView?.logMessage('Searching for inaccessible states...');
+            await this.delay(800);
     
             // Step 2: Find accessible states
+            this.mainView?.logMessage('Analyzing state reachability...');
+            await this.delay(600);
             const accessibleStates = this.getAccessibleStates();
             
-            // Step 3: Identify inaccessible states
+            // Step 3: Identify and process inaccessible states
             const removedStates = this.model.states.filter(s => !accessibleStates.includes(s.name));
             
             if (removedStates.length > 0) {
-                // Visualize inaccessible states in red
+                if(removedStates.length == 1){
+                this.mainView?.logMessage(`Found ${removedStates.length} inaccessible state:`, 'error');
+                } else {        
+                    this.mainView?.logMessage(`Found ${removedStates.length} inaccessible states:`, 'error');
+                }
+                await this.delay(800);
+                
+                // Step 4: Process each inaccessible state individually
                 for (const state of removedStates) {
-                    await this.highlightState(state, 'red');
-                    await this.delay(300);
+                    this.mainView?.logMessage(`Removing inaccessible state: ${state.name}`, 'error');
+                    await this.highlightState(state, 'red', 800);
+                    await this.delay(500);
                 }
                 
-                this.mainView?.logMessage(`Found ${removedStates.length} inaccessible states`, 'error');
-                
-                // Step 4: Remove them
+                // Step 5: Remove them from model
+                this.mainView?.logMessage('Updating automaton...');
+                await this.delay(600);
                 this.model.states = this.model.states.filter(s => accessibleStates.includes(s.name));
                 this.model.transitions = this.model.transitions.filter(t =>
                     accessibleStates.includes(t.from) && accessibleStates.includes(t.to)
                 );
                 
                 this.updateNetwork();
-                await this.delay(500);
-                this.mainView?.logMessage(`Removed states: ${removedStates.map(s => s.name).join(', ')}`, 'error');
+                await this.delay(800);
+                this.mainView?.logMessage('Automaton optimized successfully!', 'success');
+                await this.delay(600);
             } else {
-                this.mainView?.logMessage('No inaccessible states found', 'success');
+                this.mainView?.logMessage('No inaccessible states found - automaton is already optimal', 'success');
+                await this.delay(800);
             }
     
-            // Step 5: Run normal simulation
+            // Step 6: Run normal simulation
+            this.mainView?.logMessage('Starting input simulation...');
+            await this.delay(1000);
             this.runNormalSimulation(input);
         } catch (error) {
-            console.error('Error in state removal:', error);
-            this.mainView?.logMessage('Error during state removal', 'error');
+            console.error('Optimization error:', error);
+            this.mainView?.logMessage('Error during optimization process', 'error');
         }
     }
 
@@ -422,15 +437,18 @@ export class InaccessibleStatesSimulator {
         return this.mainView || new DFAMainView();
     }
 
-    /**
-     * Highlights a state with the specified color
-     */
-    protected async highlightState(state: State, color: string): Promise<void> {
-        return new Promise(resolve => {
-            this.network?.updateClusteredNode(state.name, { color });
-            setTimeout(resolve, 800);
-        });
-    }
+/**
+ * Highlights a state with the specified color and duration
+ * @param state The state to highlight
+ * @param color The highlight color
+ * @param duration The duration of the highlight in milliseconds
+ */
+protected async highlightState(state: State, color: string, duration: number = 500): Promise<void> {
+    return new Promise(resolve => {
+        this.network?.updateClusteredNode(state.name, { color });
+        setTimeout(resolve, duration);
+    });
+}
 
     /**
      * Highlights multiple states with the specified color
